@@ -5,17 +5,13 @@ var router      = express.Router();
 var bodyparser = require('body-parser');
 
 router.use(bodyparser.json() );
-
-//top level response
-router.get('/', function(req, res) {
+router.get('/welcome', function(req, res) {
     console.log ('root .....')
     res.send('Welcome to Dog City Now');
 });
 
-
 //POST create a new object (should return newly created object that has db id to client)
-
-router.post('/api/', function(req, res) {
+router.post('/', function(req, res) {
     if (req.body.name !== null) {
         console.log(' incoming to server req.body is: ', req.body);
         var dog = new Dog(req.body);
@@ -29,13 +25,11 @@ router.post('/api/', function(req, res) {
     }
 });
 
-
 //GET - returns list of all objects
 //query parameters define page size and zero based page number
-router.get('/api', function(req,res,next){
+router.get('/', function(req,res,next){
     var page = req.query.page;  //zero based
     var pageSize = req.query.pageSize;
-
     Dog.find({})
         .sort({created: 'descending'})
         .limit(pageSize)
@@ -51,8 +45,9 @@ router.get('/api', function(req,res,next){
 });
 
 
+
 //GET/:id - returns the object specified by that id
-router.get('/api/:name', function(req,res,next){
+router.get('/:name', function(req,res,next){
     res.type('json');
     var name = req.params.name;
     Dog.
@@ -72,15 +67,17 @@ router.get('/api/:name', function(req,res,next){
 
 
 //PUT/:id updates whole object with all provided data providers
-router.put('/api/:id', function (req, res) {
+router.put('/:id', function (req, res) {
     if ( req.params.id !== null ){
         Dog.
         findById( req.params.id, function(err,dog) {
             if (err) {res.send(err);}
             else {
+
+                console.log(dog.body, ' is found for deletion');
                 dog.name        = req.body.name;
                 dog.breed       = req.body.breed;
-                dog.toys    = req.body.toys;
+                dog.toys        = req.body.toys;
 
                 dog.save(req.params.id, function(err){
                     if (err) {
@@ -110,11 +107,9 @@ router.put('/api/:id', function (req, res) {
 //    };
 //});
 
-
 //DELETE/:id delete the object specified by that id
-router.delete('/api/:id', function (req, res) {
+router.delete('/:id', function (req, res) {
     if (req.params.id !== null){
-        //console.log('OOO>>>', req.params.id);
         Dog.
         findByIdAndRemove( req.params.id, function(err,dog) {
             if (err){

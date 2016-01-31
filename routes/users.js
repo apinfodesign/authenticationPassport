@@ -1,52 +1,75 @@
 var express     = require('express');
 var passport    = require('passport');
-var User        = require('../models/user');
+var Account     = require('../models/account');
 var router      = express.Router();
 var bodyparser  = require('body-parser');
 
-/* GET home page. */
-//router.get('/', function(req, res, next) {
-//    res.render('index', { title: 'Express', user: req.user });
-//});
+var json= bodyparser.json();
 
 var path = require('path');
 
-router.get('/register', function(req, res) {
-    res.sendFile(path.resolve('views/register.html'));
+
+
+router.get('/', function(req,res,next){
+    var fileName = path.resolve( __dirname + '/../public/main.html');
+
+    res.sendFile(fileName, function (err) {
+        if (err) {
+            console.log(err);
+            res.status(err.status).end();
+        }
+        else {
+            console.log('Sent:', fileName);
+        }
+    });
 });
 
-router.post('/register', function(req, res) {
 
-    console.log(req.body.username, ' is username');
+/* GET home page. */
+router.get('/hello', function(req, res, next) {
+    return res.render('register', {
+        info: 'You can register here.',
+        foo: 'Dog owners have dogs.'
+    });
+});
 
-    //User.register(new Account({
-    //    username: req.body.username
-    //}),  req.body.password, function(err, account){
-    //    if (err) {
-    //        res.sendFile(path.resolve('views/error.html'));
-    //    }
-    //
-    //    passport.authenticate('local')(req, res, function(){
-    //        res.redirect('/dogs');
-    //    });
-    //});
 
+
+router.get('/register', function(req, res) {
+    res.render('register',{info: "", foo: ""});
+});
+
+
+router.post('/register', json, function(req, res) {
+    Account.register(new Account({
+        username: req.body.username
+    }),  req.body.password, function(err, account){
+        if (err) {
+            return res.render('register', {
+                info: 'Sorry, requested user name is not available',
+                foo: ''
+            });
+        }
+        passport.authenticate('local')(req, res, function(){
+            res.redirect('/');
+        });
+    });
 });
 
 
 router.get('/login', function(req, res) {
-    res.sendFile(path.resolve('views/login.html'));
+    res.render( 'login', {} );
 });
 
 
 router.post('/login', passport.authenticate('local'), function(req, res){
-    res.redirect('/dogs');
+    res.redirect('/');
 });
 
 
 router.get('/logout', function(req, res){
     req.logout();
-    res.redirect('/dogs');
+    res.redirect('/');
 });
 
 

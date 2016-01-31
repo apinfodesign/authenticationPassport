@@ -1,24 +1,18 @@
 var express 	= require('express');
 var fs 		    = require('fs');
-var router 		= express.Router();
 var path 		= require("path");
 var session     = require('express-session');
 var mongoose    = require('mongoose');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
+var logger      = require('morgan');
+var cookieParser= require('cookie-parser');
 
-var passport      = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
+var passport    = require('passport');
+var LocalStrategy= require('passport-local').Strategy;
 
 var dogs        = require('./routes/dogs');
 var users       = require('./routes/users');
 
 var app = express();
-
-app.use('/dogs', dogs);
-app.use('/users', users);
-
-// app.use(bodyParser.json() );
 
 var bodyParser  = require('body-parser');
 
@@ -27,10 +21,13 @@ const methodOverride = require( 'method-override' );
 var debug = require('debug')('app');
 debug( 'this is app' );
 
-// view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'jade');
+ //view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+
 app.use(express.static(__dirname + '/public'));
+
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -50,21 +47,25 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) { return next(); }
-    res.redirect('/');
+    res.redirect('/login');
 }
 
-app.use('/users', users);
-app.use('/dogs', ensureAuthenticated, dogs);
 
-var Account = require('./models/user');
+var Account = require('./models/account');
 
-passport.use(new LocalStrategy(Account.authenticate() ) );
+passport.use(new LocalStrategy( Account.authenticate() ) );
 passport.serializeUser(Account.serializeUser() );
 passport.deserializeUser(Account.deserializeUser() );
 
+app.use('/', users);
+app.use('/api/dogs', ensureAuthenticated, dogs);
+
+console.log('getting conection string in app <<<<<<<<<');
+
 try {var uristring = require('./data/mongolabinfo.js').loginstring;}
 catch(err){console.log('mongolab connection error')}
-console.log(uristring, ': is uri');
+
+console.log(uristring, ': is uri >>>>>>>>>');
 mongoose.connect(uristring);
 
 
